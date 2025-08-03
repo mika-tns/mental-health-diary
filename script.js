@@ -2,34 +2,34 @@ let speechRec;
 let speechSynth;
 let currentText = "";
 
-// 音声認識初期化
-function initSpeechRec() {
-  speechRec = new p5.SpeechRec('ja-JP', gotSpeech);
-  speechRec.continuous = false; // 連続認識OFF
-  speechRec.interimResults = false; // 中間結果OFF
-}
-
-initSpeechRec();
-
-// 音声認識開始
+// マイクボタンを押したとき
 document.getElementById("start-recognition").addEventListener("click", () => {
-  console.log("🎙 マイク開始要求");
-  speechRec.start(); // ここでマイク許可を要求
+  console.log("🎙 マイク認識開始（初期化）");
+
+  // 毎回新しいインスタンスを生成
+  speechRec = new p5.SpeechRec('ja-JP', gotSpeech);
+  speechRec.continuous = false;
+  speechRec.interimResults = false;
+
+  // マイク権限要求 & 音声認識開始
+  speechRec.start();
+
   document.getElementById("recognized-text").innerText = "聞き取り中...";
 });
 
+// 音声認識結果の処理
 function gotSpeech() {
   if (speechRec.resultValue) {
     currentText = speechRec.resultString;
-    console.log("✅ 認識結果:", currentText);
     document.getElementById("recognized-text").innerText = currentText;
+    console.log("✅ 認識結果:", currentText);
   } else {
-    console.log("❌ 音声が認識されませんでした");
     document.getElementById("recognized-text").innerText = "（音声が認識されませんでした）";
+    console.log("❌ 認識失敗");
   }
 }
 
-// 記録を保存
+// 保存
 document.getElementById("save-entry").addEventListener("click", () => {
   if (!currentText) {
     alert("まず気分を話してください！");
@@ -42,7 +42,7 @@ document.getElementById("save-entry").addEventListener("click", () => {
   alert("今日の気分を保存しました！");
 });
 
-// 昨日の気分を音声読み上げ
+// 昨日の気分を読み上げ
 document.getElementById("read-yesterday").addEventListener("click", () => {
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
   const diary = JSON.parse(localStorage.getItem("moodDiary") || "{}");
