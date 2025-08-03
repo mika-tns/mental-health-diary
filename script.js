@@ -1,55 +1,66 @@
-let speechRec;
-let speechSynth;
+let recognition;
 let currentText = "";
 
-// マイクボタンを押したとき
-document.getElementById("start-recognition").addEventListener("click", () => {
-  console.log("🎙 マイク認識開始（初期化）");
+// 音声認識初期化
+function initRecognition() {
+  recognition = new webkitSpeechRecognition(); // Chrome専用
+  recognition.lang = "ja-JP";
+  recognition.interimResults = false; // 中間結果OFF
+  recognition.continuous = false;     // 単発認識
 
-  // 毎回新しいインスタンスを生成
-  speechRec = new p5.SpeechRec('ja-JP', gotSpeech);
-  speechRec.continuous = false;
-  speechRec.interimResults = false;
+  recognition.onstart = function () {
+    console.log("🎙 音声認識を開始しました");
+    document.getElementById("recognized-text").innerText = "聞き取り中...";
+  };
 
-  // マイク権限要求 & 音声認識開始
-  speechRec.start();
-
-  document.getElementById("recognized-text").innerText = "聞き取り中...";
-});
-
-// 音声認識結果の処理
-function gotSpeech() {
-  if (speechRec.resultValue) {
-    currentText = speechRec.resultString;
+  recognition.onresult = function (event) {
+    currentText = event.results[0][0].transcript;
     document.getElementById("recognized-text").innerText = currentText;
     console.log("✅ 認識結果:", currentText);
-  } else {
-    document.getElementById("recognized-text").innerText = "（音声が認識されませんでした）";
-    console.log("❌ 認識失敗");
-  }
+  };
+
+  recognition.onerror = function (event) {
+    console.error("❌ 音声認識エラー:", event.error);
+    document.getElementById("recognized-text").innerText = "（認識できませんでした）";
+  };
+
+  recognition.onend = function () {
+    console.log("🛑 音声認識を終了しました");
+  };
 }
 
-// 保存
+// マイク開始ボタン
+document.getElementById("start-recognition").addEventListener("click", () => {
+  initRecognition();
+  recognition.start(); // クリック直後に開始
+});
+
+// 記録を保存
 document.getElementById("save-entry").addEventListener("click", () => {
   if (!currentText) {
     alert("まず気分を話してください！");
     return;
   }
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const diary = JSON.parse(localStorage.getItem("moodDiary") || "{}");
   diary[today] = currentText;
   localStorage.setItem("moodDiary", JSON.stringify(diary));
   alert("今日の気分を保存しました！");
 });
 
-// 昨日の気分を読み上げ
+// 昨日の気分を音声読み上げ
 document.getElementById("read-yesterday").addEventListener("click", () => {
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000)
+    .toISOString()
+    .split("T")[0];
   const diary = JSON.parse(localStorage.getItem("moodDiary") || "{}");
   if (diary[yesterday]) {
-    speechSynth = new p5.Speech();
-    speechSynth.setLang('ja-JP');
-    speechSynth.speak(`昨日の気分は ${diary[yesterday]} です`);
+    const synth = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(
+      `昨日の気分は ${diary[yesterday]} です`
+    );
+    utter.lang = "ja-JP";
+    synth.speak(utter);
   } else {
     alert("昨日の記録はありません。");
   }
@@ -59,24 +70,26 @@ document.getElementById("read-yesterday").addEventListener("click", () => {
 document.getElementById("show-graph").addEventListener("click", () => {
   const diary = JSON.parse(localStorage.getItem("moodDiary") || "{}");
   const labels = Object.keys(diary);
-  const data = Object.values(diary).map(mood => mood.length);
+  const data = Object.values(diary).map((mood) => mood.length);
 
   const ctx = document.getElementById("moodChart").getContext("2d");
   new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
       labels: labels,
-      datasets: [{
-        label: "気分の記録（文字数）",
-        data: data,
-        backgroundColor: '#4a6572'
-      }]
+      datasets: [
+        {
+          label: "気分の記録（文字数）",
+          data: data,
+          backgroundColor: "#4a6572",
+        },
+      ],
     },
     options: {
       responsive: true,
       scales: {
-        y: { beginAtZero: true }
-      }
-    }
+        y: { beginAtZero: true },
+      },
+    },
   });
 });
