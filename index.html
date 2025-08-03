@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌿 音声操作メンタルヘルス日記</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <!-- p5.speech.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.speech/0.0.2/p5.speech.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🌿 音声操作メンタルヘルス日記 🌿</h1>
+  </header>
+
+  <main>
+    <div class="button-group">
+      <button id="start-recognition">🎙 気分を話す</button>
+      <button id="save-entry">💾 記録する</button>
+      <button id="read-yesterday">🔊 昨日の気分</button>
+      <button id="show-graph">📊 グラフ表示</button>
+    </div>
+
+    <div class="result-box">
+      <h2>認識結果</h2>
+      <p id="recognized-text">（ここに音声認識結果が表示されます）</p>
+    </div>
+
+    <canvas id="moodChart" style="max-width: 600px; margin: auto;"></canvas>
+  </main>
+
+  <footer>
+    <p>© 2025 🌿 音声操作メンタルヘルス日記</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
