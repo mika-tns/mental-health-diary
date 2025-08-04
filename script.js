@@ -45,7 +45,7 @@ document.getElementById("save-entry").addEventListener("click", () => {
   const diary = JSON.parse(localStorage.getItem("moodDiary") || "{}");
   diary[today] = currentText;
   localStorage.setItem("moodDiary", JSON.stringify(diary));
-  alert("今日の気分を保存しました！");
+  alert("保存しました！今日: " + today + " 内容:" + currentText);
 });
 
 // 昨日の気分を音声読み上げ
